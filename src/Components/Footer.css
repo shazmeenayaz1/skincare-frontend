@@ -1,0 +1,152 @@
+.footer {
+  width: 100%;
+  background-color: #ffffff;
+  padding-top: 4rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Trust Badges Section */
+.footer-badges {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1400px;
+  margin: 0 auto 4rem auto;
+  padding: 0 2rem;
+  gap: 2rem;
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.badge-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.badge-icon.purple {
+  background-color: #7b2cbf;
+}
+
+.badge-info h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.2rem;
+}
+
+.badge-info p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Footer Links Section */
+.footer-main {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(5, 1fr);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem 2rem;
+  gap: 2rem;
+}
+
+.footer-column h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 0.8rem;
+}
+
+.footer-column ul li a {
+  color: #666;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.footer-column ul li a:hover {
+  color: #7b2cbf;
+}
+
+.contact-info li {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.contact-info .address {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+/* Bottom Destination Banner */
+.footer-bottom {
+  background-color: #fafafa;
+  padding: 3rem 2rem 0 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.destination-content {
+  margin-bottom: 2rem;
+}
+
+.crown-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.destination-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.footer-illustration {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.illu-img {
+  width: 100%;
+  display: block;
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .footer-main {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .footer-badges {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-main {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

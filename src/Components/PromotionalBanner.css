@@ -1,0 +1,144 @@
+.promo-banner {
+  width: 100%;
+  padding: 1.5rem 2rem;
+  background-color: #ffffff;
+}
+
+.promo-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  height: 450px; /* Increased height as requested */
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.promo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.promo-container:hover .promo-img {
+  transform: scale(1.05);
+}
+
+.promo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  display: flex;
+  align-items: center;
+  padding-left: 6rem;
+}
+
+.promo-content {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: slideInLeft 0.8s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.promo-tag {
+  color: #9d4edd;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+}
+
+.promo-text {
+  color: white;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 400;
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.1;
+}
+
+.promo-text .pakistan {
+  font-weight: 800;
+  background: linear-gradient(to right, #9d4edd, #e0aaff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.promo-desc {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.promo-shop-btn {
+  width: fit-content;
+  background: #7b2cbf;
+  color: white;
+  padding: 1.2rem 2.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(123, 44, 191, 0.3);
+}
+
+.promo-shop-btn:hover {
+  background: #5a189a;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(123, 44, 191, 0.4);
+}
+
+@media (max-width: 1024px) {
+  .promo-overlay {
+    padding-left: 3rem;
+  }
+  
+  .promo-container {
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .promo-banner {
+    padding: 1rem;
+  }
+  
+  .promo-container {
+    height: 300px;
+  }
+  
+  .promo-overlay {
+    padding-left: 2rem;
+    background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 100%);
+  }
+  
+  .promo-text {
+    font-size: 2rem;
+  }
+  
+  .promo-desc {
+    font-size: 1rem;
+  }
+  
+  .promo-shop-btn {
+    padding: 0.8rem 1.8rem;
+    font-size: 0.9rem;
+  }
+}

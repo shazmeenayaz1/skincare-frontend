@@ -1,0 +1,22 @@
+.home-page {
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #ffffff;
+}
+
+/* Page spacing */
+.home-page > * {
+  margin-bottom: 0;
+}
+
+/* Ensure sections have proper spacing now that hero is gone */
+.promo-banner {
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .home-page {
+    padding-top: 0;
+  }
+}
