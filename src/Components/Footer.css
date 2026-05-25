@@ -1,6 +1,6 @@
 .footer {
   width: 100%;
-  background-color: #ffffff;
+  background-color: var(--store-bg);
   padding-top: 4rem;
   border-top: 1px solid #f0f0f0;
 }
@@ -32,7 +32,7 @@
 }
 
 .badge-icon.purple {
-  background-color: #7b2cbf;
+  background-color: var(--store-primary);
 }
 
 .badge-info h4 {
@@ -50,11 +50,15 @@
 /* Footer Links Section */
 .footer-main {
   display: grid;
-  grid-template-columns: 1.5fr repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem 4rem 2rem;
   gap: 2rem;
+}
+
+.footer-column {
+  min-width: 0;
 }
 
 .footer-column h3 {
@@ -80,7 +84,7 @@
 }
 
 .footer-column ul li a:hover {
-  color: #7b2cbf;
+  color: var(--store-primary);
 }
 
 .contact-info li {
@@ -98,11 +102,26 @@
 
 /* Bottom Destination Banner */
 .footer-bottom {
-  background-color: #fafafa;
-  padding: 3rem 2rem 0 2rem;
+  background-color: var(--store-surface-alt);
+  padding: 1.5rem 2rem;
   text-align: center;
-  position: relative;
-  overflow: hidden;
+  border-top: 1px solid #eee;
+}
+
+.footer-bottom p {
+  margin: 0;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.footer-column a {
+  color: #666;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-column a:hover {
+  color: var(--store-primary);
 }
 
 .destination-content {
@@ -135,7 +154,7 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .footer-main {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .footer-badges {

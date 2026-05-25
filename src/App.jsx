@@ -20,28 +20,40 @@ const Wallet = () => <div className="animate-fade-in"><h1>Wallet</h1><p classNam
 const Settings = () => <div className="animate-fade-in"><h1>Settings</h1><p className="text-secondary">System configurations coming soon...</p></div>;
 
 import HomeLayout from './layouts/HomeLayout';
+import StoreLayout from './layouts/StoreLayout';
 import Home from './Pages/Home';
 import Checkout from './Pages/Checkout';
+import ProductDetail from './Pages/ProductDetail';
+import Shop from './Pages/Shop';
+import About from './Pages/About';
+import Contact from './Pages/Contact';
 import CartDrawer from './Components/CartDrawer';
+import ScrollToTop from './Components/ScrollToTop';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <CartDrawer />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomeLayout />}>
             <Route index element={<Home />} />
+            <Route path="shop" element={<Shop />} />
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
             <Route path="checkout" element={<Checkout />} />
-            {/* Add more public routes like /shop, /product/:id here */}
+            <Route path="product/:id" element={<ProductDetail />} />
           </Route>
 
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          {/* Auth Routes — same store theme + navbar */}
+          <Route element={<StoreLayout />}>
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+          </Route>
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

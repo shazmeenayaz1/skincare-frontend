@@ -52,7 +52,7 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="auth-container">
+        <div className="auth-page">
             <div className="auth-card animate-fade-in">
                 <div className="auth-header">
                     <div className="auth-logo">

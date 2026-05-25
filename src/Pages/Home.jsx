@@ -1,30 +1,25 @@
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { fetchCategories } from '../features/categorySlice';
-import { fetchProducts } from '../features/productSlice';
+import { useLocation } from 'react-router-dom';
 import PromotionalBanner from '../Components/PromotionalBanner';
-import ShopByCategory from '../Components/ShopByCategory';
 import FeaturedProducts from '../Components/FeaturedProducts';
+import CustomerReviews from '../Components/CustomerReviews';
 import './Home.css';
 
 const Home = () => {
-  const dispatch = useDispatch();
+  const location = useLocation();
 
   useEffect(() => {
-    dispatch(fetchCategories());
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location.hash, location.search]);
 
   return (
     <div className="home-page">
-      {/* Promotional Banner */}
       <PromotionalBanner />
-
-      {/* Shop By Category */}
-      <ShopByCategory />
-
-      {/* New Arrivals Section */}
       <FeaturedProducts />
+      <CustomerReviews />
     </div>
   );
 };

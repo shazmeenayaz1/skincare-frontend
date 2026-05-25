@@ -1,8 +1,25 @@
 .checkout-page {
-  background-color: #f8f9fa;
+  background-color: var(--store-bg);
   min-height: 100vh;
   padding: 2rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--store-font);
+}
+
+.checkout-empty {
+  max-width: 480px;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 2rem;
+}
+
+.checkout-empty h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.checkout-empty p {
+  color: #666;
+  margin-bottom: 1.5rem;
 }
 
 .checkout-container {
@@ -33,7 +50,7 @@
 }
 
 .back-link {
-  color: #007bff;
+  color: var(--store-primary);
   text-decoration: none;
   font-size: 0.9rem;
   display: flex;
@@ -42,13 +59,18 @@
 }
 
 .sign-in-btn {
-  background: #50d07d;
+  background: var(--store-primary);
   color: #fff;
   border: none;
   padding: 0.5rem 1.5rem;
-  border-radius: 4px;
+  border-radius: var(--store-radius);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.sign-in-btn:hover {
+  background: var(--store-primary-dark);
 }
 
 .checkout-grid {
@@ -75,8 +97,8 @@
 .step-number {
   width: 32px;
   height: 32px;
-  border: 2px solid #50d07d;
-  color: #50d07d;
+  border: 2px solid var(--store-primary);
+  color: var(--store-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -249,7 +271,7 @@
 .summary-item-info h3 {
   font-size: 0.9rem;
   margin: 0 0 0.25rem 0;
-  color: #007bff;
+  color: var(--store-primary);
   font-weight: 500;
 }
 
@@ -302,7 +324,7 @@
 
 .place-order-btn {
   width: 100%;
-  background: #50d07d;
+  background: var(--store-primary);
   color: #fff;
   border: none;
   padding: 1.25rem;

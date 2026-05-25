@@ -1,7 +1,7 @@
 .promo-banner {
   width: 100%;
   padding: 1.5rem 2rem;
-  background-color: #ffffff;
+  background-color: var(--store-bg);
 }
 
 .promo-container {
@@ -52,7 +52,7 @@
 }
 
 .promo-tag {
-  color: #9d4edd;
+  color: var(--store-primary-light);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -70,8 +70,9 @@
 
 .promo-text .pakistan {
   font-weight: 800;
-  background: linear-gradient(to right, #9d4edd, #e0aaff);
+  background: linear-gradient(to right, var(--store-primary), var(--store-primary-light));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -84,7 +85,7 @@
 
 .promo-shop-btn {
   width: fit-content;
-  background: #7b2cbf;
+  background: var(--store-primary);
   color: white;
   padding: 1.2rem 2.5rem;
   border-radius: 50px;
@@ -96,13 +97,13 @@
   gap: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(123, 44, 191, 0.3);
+  box-shadow: 0 10px 20px rgba(233, 30, 140, 0.3);
 }
 
 .promo-shop-btn:hover {
-  background: #5a189a;
+  background: var(--store-primary-dark);
   transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(123, 44, 191, 0.4);
+  box-shadow: 0 15px 30px rgba(233, 30, 140, 0.4);
 }
 
 @media (max-width: 1024px) {

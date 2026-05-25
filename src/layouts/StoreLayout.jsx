@@ -2,22 +2,19 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../Components/Navbar';
-import CategoryBar from '../Components/CategoryBar';
 import Footer from '../Components/Footer';
 import { fetchCategories } from '../features/categorySlice';
 import { fetchProducts } from '../features/productSlice';
-import './HomeLayout.css';
+import './StoreLayout.css';
 
-const HomeLayout = () => {
+const StoreLayout = () => {
   const dispatch = useDispatch();
   const { status: catStatus } = useSelector((state) => state.categories);
   const { status: prodStatus } = useSelector((state) => state.products);
 
   useEffect(() => {
     document.body.classList.add('light');
-    return () => {
-      document.body.classList.remove('light');
-    };
+    return () => document.body.classList.remove('light');
   }, []);
 
   useEffect(() => {
@@ -26,10 +23,9 @@ const HomeLayout = () => {
   }, [dispatch, catStatus, prodStatus]);
 
   return (
-    <div className="home-layout">
+    <div className="store-layout">
       <Navbar />
-      <CategoryBar />
-      <main className="home-content">
+      <main className="store-content">
         <Outlet />
       </main>
       <Footer />
@@ -37,4 +33,4 @@ const HomeLayout = () => {
   );
 };
 
-export default HomeLayout;
+export default StoreLayout;
