@@ -1,7 +1,7 @@
 .home-page {
   width: 100%;
   overflow-x: hidden;
-  background-color: #ffffff;
+  background-color: var(--store-bg);
 }
 
 /* Page spacing */

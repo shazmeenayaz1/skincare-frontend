@@ -1,4 +1,5 @@
 .product-card {
+  position: relative;
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -6,6 +7,31 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.product-card-link,
+.product-card-image-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.product-card-image-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.product-card-link {
+  display: block;
+  flex: 1;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .card-image-wrapper {
@@ -48,7 +74,7 @@
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background: #7b2cbf;
+  background: var(--store-primary);
   color: white;
   border: none;
   padding: 6px 12px;
@@ -62,7 +88,8 @@
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background: #7b2cbf;
+  z-index: 2;
+  background: var(--store-primary);
   color: white;
   width: 32px;
   height: 32px;
@@ -72,7 +99,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(123, 44, 191, 0.3);
+  box-shadow: 0 4px 8px rgba(233, 30, 140, 0.3);
+}
+
+.add-to-cart-icon-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .card-info {
@@ -131,7 +164,7 @@
 
 .pay-now-badge {
   margin-top: 8px;
-  background: #f0e6ff;
+  background: #ffe6f4;
   border-radius: 4px;
   padding: 4px 8px;
   display: flex;
@@ -141,7 +174,7 @@
 }
 
 .b-logo {
-  background: #7b2cbf;
+  background: var(--store-primary);
   color: white;
   font-size: 0.6rem;
   font-weight: 900;
@@ -156,7 +189,7 @@
 
 .pay-now-text {
   font-size: 0.7rem;
-  color: #5a189a;
+  color: var(--store-primary-dark);
 }
 
 .pay-now-text strong {

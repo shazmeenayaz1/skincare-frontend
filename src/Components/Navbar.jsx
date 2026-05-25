@@ -1,45 +1,89 @@
 import React from 'react';
 import { Search, User, ShoppingCart, LayoutDashboard } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { useAuth } from '../context/AuthContext';
 import { toggleDrawer } from '../features/cartSlice';
 import './Navbar.css';
 
 const Navbar = () => {
   const { totalQuantity } = useSelector((state) => state.cart);
+  const { user } = useAuth();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = e.target.search.value.trim();
+    if (q) navigate(`/shop?q=${encodeURIComponent(q)}`);
+  };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* Logo Section */}
         <div className="navbar-logo">
-          <Link to="/" className="logo-text">GLOWFY</Link>
+          <Link to="/" className="logo-text">
+            GLOWFY
+          </Link>
         </div>
 
-        {/* Search Bar Section */}
-        <div className="navbar-search">
+        <ul className="navbar-nav">
+          <li>
+            <NavLink to="/shop" className={({ isActive }) => (isActive ? 'active' : '')}>
+              Shop
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : '')}>
+              About
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : '')}>
+              Contact
+            </NavLink>
+          </li>
+        </ul>
+
+        <form className="navbar-search" onSubmit={handleSearch}>
           <div className="search-wrapper">
-            <input 
-              type="text" 
-              placeholder="Search products..." 
+            <input
+              type="search"
+              name="search"
+              placeholder="Search products..."
               className="search-input"
             />
             <Search className="search-icon" size={20} />
           </div>
-        </div>
+        </form>
 
-        {/* Icons Section */}
         <div className="navbar-actions">
+          {user ? (
+            <Link to="/admin" className="action-btn" title="Account">
+              <User size={24} strokeWidth={1.5} />
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="nav-auth-link">
+                Login
+              </Link>
+              <Link to="/register" className="nav-auth-link register">
+                Register
+              </Link>
+            </>
+          )}
           <Link to="/admin" className="action-btn" title="Admin Panel">
             <LayoutDashboard size={24} strokeWidth={1.5} />
           </Link>
-          <button className="action-btn">
-            <User size={24} strokeWidth={1.5} />
-          </button>
-          <button className="action-btn cart-btn" onClick={() => dispatch(toggleDrawer())}>
+          <button
+            type="button"
+            className="action-btn cart-btn"
+            onClick={() => dispatch(toggleDrawer())}
+          >
             <ShoppingCart size={24} strokeWidth={1.5} />
-            <span className="cart-badge">{totalQuantity}</span>
+            {totalQuantity > 0 && (
+              <span className="cart-badge">{totalQuantity}</span>
+            )}
           </button>
         </div>
       </div>

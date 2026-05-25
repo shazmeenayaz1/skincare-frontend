@@ -14,6 +14,19 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+// Fetch single product
+export const fetchProductById = createAsyncThunk(
+  'products/fetchProductById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await api(`/products/get/${id}`);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Create product
 export const createProduct = createAsyncThunk(
   'products/createProduct',
@@ -67,6 +80,9 @@ const productSlice = createSlice({
     items: [],
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    currentProduct: null,
+    currentProductStatus: 'idle',
+    currentProductError: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -82,6 +98,20 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+      })
+      // Fetch Single Product
+      .addCase(fetchProductById.pending, (state) => {
+        state.currentProductStatus = 'loading';
+        state.currentProduct = null;
+        state.currentProductError = null;
+      })
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.currentProductStatus = 'succeeded';
+        state.currentProduct = action.payload;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.currentProductStatus = 'failed';
+        state.currentProductError = action.payload;
       })
       // Create Product
       .addCase(createProduct.fulfilled, (state, action) => {

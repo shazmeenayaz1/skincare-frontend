@@ -1,14 +1,28 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { ChevronRight, ArrowLeft, ShieldCheck, Truck, CreditCard, ShoppingBag } from 'lucide-react';
+import { ChevronRight, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatPrice } from '../utils/cartUtils';
 import './Checkout.css';
 
 const Checkout = () => {
   const { items, subtotal } = useSelector((state) => state.cart);
-  const shipping = 10.00;
-  const tax = subtotal * 0.1;
-  const total = subtotal + shipping + tax;
+  const shipping = items.length > 0 ? 250 : 0;
+  const total = subtotal + shipping;
+
+  if (items.length === 0) {
+    return (
+      <div className="checkout-page">
+        <div className="checkout-empty">
+          <h1>Your cart is empty</h1>
+          <p>Add some products before checking out.</p>
+          <Link to="/" className="back-link">
+            <ArrowLeft size={16} /> Back to Store
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="checkout-page">
@@ -197,7 +211,9 @@ const Checkout = () => {
                     </div>
                     <div className="summary-item-info">
                       <h3>{item.name}</h3>
-                      <p className="summary-item-sku">SKU: 24-WG02</p>
+                      {item.sku && (
+                        <p className="summary-item-sku">SKU: {item.sku}</p>
+                      )}
                       <div className="summary-item-qty">
                         <span>{item.quantity}</span>
                         <div className="qty-arrows">
@@ -205,7 +221,9 @@ const Checkout = () => {
                           <ChevronRight size={12} className="down" />
                         </div>
                       </div>
-                      <p className="summary-item-price">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="summary-item-price">
+                        {formatPrice(item.price * item.quantity)}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -215,21 +233,17 @@ const Checkout = () => {
             <div className="summary-totals">
               <div className="total-row">
                 <span>Cart Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="total-row">
-                <span>Shipping <small>Flat Rate - Fixed</small></span>
-                <span>${shipping.toFixed(2)}</span>
+                <span>Shipping <small>Flat Rate</small></span>
+                <span>{formatPrice(shipping)}</span>
               </div>
               <div className="total-row grand-total">
                 <div className="grand-label">
-                  <strong>Order Total Incl. Tax</strong>
+                  <strong>Order Total</strong>
                 </div>
-                <strong>${total.toFixed(2)}</strong>
-              </div>
-              <div className="total-row subtext">
-                <span>Order Total Excl. Tax</span>
-                <span>${(total - tax).toFixed(2)}</span>
+                <strong>{formatPrice(total)}</strong>
               </div>
             </div>
 
