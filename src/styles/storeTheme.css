@@ -1,9 +1,9 @@
 /* GLOWFY Store Theme — shared across all public pages */
 :root,
 body.light {
-  --store-primary: #e91e8c;
-  --store-primary-dark: #c2186f;
-  --store-primary-light: #ff6eb4;
+  --store-primary: #ed9ec5;
+  --store-primary-dark: #d985ad;
+  --store-primary-light: #f8c8e0;
   --store-bg: #fff5f9;
   --store-surface: #ffffff;
   --store-surface-alt: #fff0f6;
@@ -12,8 +12,8 @@ body.light {
   --store-text: #1a1a1a;
   --store-text-secondary: #555555;
   --store-text-muted: #888888;
-  --store-hero-bg: linear-gradient(135deg, #ffe6f4 0%, #fff5f9 100%);
-  --store-shadow: 0 4px 20px rgba(233, 30, 140, 0.08);
+  --store-hero-bg: linear-gradient(135deg, #ffeef6 0%, #fff5f9 100%);
+  --store-shadow: 0 4px 20px rgba(237, 158, 197, 0.1);
   --store-radius: 12px;
   --store-radius-lg: 16px;
   --store-font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -23,13 +23,13 @@ body.light {
   --bg-dark: #fff5f9;
   --sidebar-bg: #ffffff;
   --card-bg: #ffffff;
-  --glass-bg: rgba(233, 30, 140, 0.04);
+  --glass-bg: rgba(237, 158, 197, 0.05);
   --glass-border: #f5d0e3;
   --text-primary: #1a1a1a;
   --text-secondary: #555555;
   --text-muted: #888888;
-  --accent-pink: #e91e8c;
-  --accent-cyan: #ff6eb4;
+  --accent-pink: #ed9ec5;
+  --accent-cyan: #f8c8e0;
   background-color: #fff5f9;
 }
 

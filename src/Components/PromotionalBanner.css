@@ -8,11 +8,34 @@
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  height: 450px; /* Increased height as requested */
+  height: 450px;
   border-radius: 24px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.promo-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--store-surface-alt);
+  color: var(--store-text-muted);
+  font-size: 1rem;
+}
+
+.promo-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.promo-slide.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
 }
 
 .promo-img {
@@ -22,7 +45,7 @@
   transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-.promo-container:hover .promo-img {
+.promo-slide.active:hover .promo-img {
   transform: scale(1.05);
 }
 
@@ -87,6 +110,7 @@
   width: fit-content;
   background: var(--store-primary);
   color: white;
+  text-decoration: none;
   padding: 1.2rem 2.5rem;
   border-radius: 50px;
   font-weight: 600;
@@ -97,13 +121,73 @@
   gap: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(233, 30, 140, 0.3);
+  box-shadow: 0 10px 20px rgba(237, 158, 197, 0.25);
 }
 
 .promo-shop-btn:hover {
   background: var(--store-primary-dark);
   transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(233, 30, 140, 0.4);
+  box-shadow: 0 15px 30px rgba(237, 158, 197, 0.3);
+  color: white;
+}
+
+.promo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--store-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.promo-nav:hover {
+  background: white;
+  color: var(--store-primary-dark);
+}
+
+.promo-nav-prev {
+  left: 1rem;
+}
+
+.promo-nav-next {
+  right: 1rem;
+}
+
+.promo-dots {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+}
+
+.promo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.promo-dot.active {
+  background: var(--store-primary);
+  width: 28px;
+  border-radius: 50px;
 }
 
 @media (max-width: 1024px) {

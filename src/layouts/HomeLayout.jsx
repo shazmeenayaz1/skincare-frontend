@@ -6,12 +6,14 @@ import CategoryBar from '../Components/CategoryBar';
 import Footer from '../Components/Footer';
 import { fetchCategories } from '../features/categorySlice';
 import { fetchProducts } from '../features/productSlice';
+import { fetchBanners } from '../features/bannerSlice';
 import './HomeLayout.css';
 
 const HomeLayout = () => {
   const dispatch = useDispatch();
   const { status: catStatus } = useSelector((state) => state.categories);
   const { status: prodStatus } = useSelector((state) => state.products);
+  const { status: bannerStatus } = useSelector((state) => state.banners);
 
   useEffect(() => {
     document.body.classList.add('light');
@@ -23,7 +25,8 @@ const HomeLayout = () => {
   useEffect(() => {
     if (catStatus === 'idle') dispatch(fetchCategories());
     if (prodStatus === 'idle') dispatch(fetchProducts());
-  }, [dispatch, catStatus, prodStatus]);
+    if (bannerStatus === 'idle') dispatch(fetchBanners());
+  }, [dispatch, catStatus, prodStatus, bannerStatus]);
 
   return (
     <div className="home-layout">

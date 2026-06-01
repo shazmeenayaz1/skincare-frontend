@@ -1,4 +1,4 @@
-const BASE_URL = 'https://skincare-backend-alpha.vercel.app';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://skincare-backend-alpha.vercel.app';
 
 const api = async (endpoint, options = {}) => {
     const token = localStorage.getItem('token');

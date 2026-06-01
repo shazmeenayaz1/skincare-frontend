@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash, Search, X, Upload } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../../features/productSlice';
 import { fetchCategories } from '../../features/categorySlice';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -63,7 +64,7 @@ const Products = () => {
         file: null,
         gallery_files: []
       });
-      setPreviewImage(product.main_image);
+      setPreviewImage(resolveImageUrl(product.main_image));
     } else {
       setEditingProduct(null);
       setFormData({ 
@@ -170,6 +171,7 @@ const Products = () => {
         <table>
           <thead>
             <tr>
+              <th style={{ width: '60px', textAlign: 'center' }}>#</th>
               <th>NAME</th>
               <th>CATEGORY</th>
               <th>PRICE</th>
@@ -179,13 +181,21 @@ const Products = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {products.map((product, index) => (
               <tr key={product._id || product.id}>
+                <td style={{ fontWeight: 700, color: 'var(--accent-pink)', textAlign: 'center' }}>
+                  {index + 1}
+                </td>
                 <td style={{ fontWeight: 600 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     {product.main_image && (
-                      <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                        <img src={product.main_image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--glass-border)', flexShrink: 0 }}>
+                        <img
+                          src={resolveImageUrl(product.main_image)}
+                          alt={product.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/40?text=NA'; }}
+                        />
                       </div>
                     )}
                     {product.name}
