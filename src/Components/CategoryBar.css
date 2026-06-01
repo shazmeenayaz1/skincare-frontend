@@ -59,12 +59,12 @@
 
 .category-link:hover {
   color: var(--store-primary);
-  background: #ffe6f4;
+  background: #fff0f7;
 }
 
 .category-link.active {
   color: var(--store-primary);
-  background: #ffe6f4;
+  background: #fff0f7;
 }
 
 .category-link.active::after {
@@ -90,7 +90,7 @@
 .category-scroll-btn:hover {
   border-color: var(--store-primary);
   color: var(--store-primary);
-  background: #ffe6f4;
+  background: #fff0f7;
 }
 
 .category-skeleton {

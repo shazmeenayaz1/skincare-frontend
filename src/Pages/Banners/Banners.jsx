@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash, X, Image as ImageIcon, Upload } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchBanners, createBanner, updateBanner, deleteBanner } from '../../features/bannerSlice';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 const Banners = () => {
   const dispatch = useDispatch();
@@ -22,7 +23,7 @@ const Banners = () => {
     if (banner) {
       setEditingBanner(banner);
       setFormData({ title: banner.title, description: banner.description, image: banner.image, file: null });
-      setPreviewImage(banner.image);
+      setPreviewImage(resolveImageUrl(banner.image));
     } else {
       setEditingBanner(null);
       setFormData({ title: '', description: '', image: '', file: null });
@@ -100,7 +101,11 @@ const Banners = () => {
               <tr key={banner._id || banner.id}>
                 <td>
                   <div className="banner-preview-small">
-                    <img src={banner.image} alt={banner.title} />
+                    <img
+                      src={resolveImageUrl(banner.image)}
+                      alt={banner.title}
+                      onError={(e) => { e.target.src = 'https://via.placeholder.com/80?text=Banner'; }}
+                    />
                   </div>
                 </td>
                 <td style={{ fontWeight: 600 }}>{banner.title}</td>

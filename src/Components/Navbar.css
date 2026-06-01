@@ -61,7 +61,7 @@
 .navbar-nav a:hover,
 .navbar-nav a.active {
   color: var(--store-primary);
-  background: #ffe6f4;
+  background: #fff0f7;
 }
 
 .nav-auth-link {
@@ -132,7 +132,7 @@
 .search-input:focus {
   border-color: var(--store-primary);
   background-color: var(--store-bg);
-  box-shadow: 0 4px 15px rgba(233, 30, 140, 0.1);
+  box-shadow: 0 4px 15px rgba(237, 158, 197, 0.12);
 }
 
 .search-icon {

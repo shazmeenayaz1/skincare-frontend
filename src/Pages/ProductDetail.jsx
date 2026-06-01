@@ -125,16 +125,23 @@ const ProductDetail = () => {
               <span>(128 Reviews)</span>
             </div>
 
+            {(description || short_description) && (
+              <div className="product-description-container" style={{ margin: '1.5rem 0', padding: '1.5rem 0', borderTop: '1px solid #eee', borderBottom: '1px solid #eee' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--store-primary)', marginBottom: '0.5rem' }}>
+                  Description
+                </h3>
+                <p className="product-short-desc" style={{ margin: 0, color: 'var(--store-primary)' }}>
+                  {description || short_description}
+                </p>
+              </div>
+            )}
+
             <div className="product-pricing">
               {discount_price && (
                 <span className="detail-original-price">Rs.{price}</span>
               )}
               <span className="detail-sale-price">Rs.{salePrice}</span>
             </div>
-
-            {short_description && (
-              <p className="product-short-desc">{short_description}</p>
-            )}
 
             <div className="quantity-row">
               <span className="qty-label">Quantity</span>
@@ -195,28 +202,22 @@ const ProductDetail = () => {
         </div>
 
         <div className="product-detail-tabs">
-          {description && (
-            <section className="detail-section">
-              <h2>Description</h2>
-              <p>{description}</p>
-            </section>
-          )}
           {benefits && (
             <section className="detail-section">
               <h2>Benefits</h2>
-              <p>{benefits}</p>
+              <p style={{ color: 'var(--store-primary)' }}>{benefits}</p>
             </section>
           )}
           {ingredients && (
             <section className="detail-section">
               <h2>Ingredients</h2>
-              <p>{ingredients}</p>
+              <p style={{ color: 'var(--store-primary)' }}>{ingredients}</p>
             </section>
           )}
           {how_to_use && (
             <section className="detail-section">
               <h2>How to Use</h2>
-              <p>{how_to_use}</p>
+              <p style={{ color: 'var(--store-primary)' }}>{how_to_use}</p>
             </section>
           )}
         </div>

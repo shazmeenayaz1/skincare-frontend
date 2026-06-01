@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash, X } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '../../features/categorySlice';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 const Categories = () => {
   const dispatch = useDispatch();
@@ -26,7 +27,7 @@ const Categories = () => {
         description: category.description || '', 
         image: null 
       });
-      setImagePreview(category.image || null);
+      setImagePreview(resolveImageUrl(category.image) || null);
     } else {
       setEditingCategory(null);
       setFormData({ name: '', description: '', image: null });
@@ -98,7 +99,11 @@ const Categories = () => {
                 <tr key={category._id || category.id}>
                   <td>
                     <div className="table-img-container">
-                      <img src={category.image || 'https://via.placeholder.com/40'} alt={category.name || 'Category'} />
+                      <img
+                        src={resolveImageUrl(category.image) || 'https://via.placeholder.com/40'}
+                        alt={category.name || 'Category'}
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }}
+                      />
                     </div>
                   </td>
                   <td style={{ fontWeight: 600 }}>{category.name || 'Unnamed'}</td>
