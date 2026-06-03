@@ -479,3 +479,114 @@
     font-size: 1.75rem;
   }
 }
+
+/* Checkout Success Screen Styles */
+.checkout-success-container {
+  max-width: 600px;
+  margin: 4rem auto;
+  text-align: center;
+  background: var(--store-surface);
+  border: 1px solid var(--store-border-light);
+  border-radius: var(--store-radius-lg);
+  padding: 3.5rem 2.5rem;
+  box-shadow: var(--store-shadow);
+  border-top: 5px solid var(--store-primary);
+}
+
+.success-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: var(--store-primary-light);
+  border-radius: 50%;
+  color: var(--store-primary-dark);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 15px rgba(237, 158, 197, 0.25);
+}
+
+.checkout-success-container h1 {
+  font-size: 2rem;
+  color: var(--store-text);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.checkout-success-container p {
+  color: var(--store-text-secondary);
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.success-details-card {
+  background: var(--store-surface-alt);
+  border: 1px solid var(--store-border-light);
+  border-radius: var(--store-radius);
+  padding: 1.5rem;
+  text-align: left;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.success-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: var(--store-text-secondary);
+  border-bottom: 1px dashed var(--store-border-light);
+  padding-bottom: 0.5rem;
+}
+
+.success-detail-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.success-detail-row strong {
+  color: var(--store-text);
+}
+
+.success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.primary-btn {
+  background: var(--store-primary);
+  color: #fff;
+  border: none;
+  padding: 0.9rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--store-radius);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(237, 158, 197, 0.2);
+}
+
+.primary-btn:hover {
+  background: var(--store-primary-dark);
+  transform: translateY(-1px);
+}
+
+.secondary-btn {
+  background: transparent;
+  color: var(--store-text);
+  border: 1.5px solid var(--store-border);
+  padding: 0.9rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--store-radius);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.secondary-btn:hover {
+  background: var(--store-surface-alt);
+  border-color: var(--store-text-secondary);
+}
+

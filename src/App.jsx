@@ -12,10 +12,10 @@ import ForgotPassword from './Pages/Auth/ForgotPassword';
 import ResetPassword from './Pages/Auth/ResetPassword';
 import Profile from './Pages/Users/Profile';
 import { AuthProvider } from './context/AuthContext';
+import Orders from './Pages/Orders/Orders';
 
 
 // Placeholder components for other links
-const Orders = () => <div className="animate-fade-in"><h1>Orders</h1><p className="text-secondary">Order management coming soon...</p></div>;
 const Wallet = () => <div className="animate-fade-in"><h1>Wallet</h1><p className="text-secondary">Financial overview coming soon...</p></div>;
 const Settings = () => <div className="animate-fade-in"><h1>Settings</h1><p className="text-secondary">System configurations coming soon...</p></div>;
 

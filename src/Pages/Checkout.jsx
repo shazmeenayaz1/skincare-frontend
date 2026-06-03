@@ -1,17 +1,32 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { ChevronRight, ArrowLeft, CreditCard } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { ChevronRight, ArrowLeft, CreditCard, Check, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../utils/cartUtils';
+import { clearCart } from '../features/cartSlice';
+import api from '../utils/api';
 import './Checkout.css';
 
 const Checkout = () => {
+  const dispatch = useDispatch();
   const { items, subtotal } = useSelector((state) => state.cart);
   const shipping = items.length > 0 ? 250 : 0;
   const total = subtotal + shipping;
 
   const [paymentMethod, setPaymentMethod] = useState('cod');
-  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [placedOrder, setPlacedOrder] = useState(null);
+
+  // Shipping details state
+  const [customer, setCustomer] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: ''
+  });
+
   // Card details state for premium interactive experience
   const [cardDetails, setCardDetails] = useState({
     name: '',
@@ -20,16 +35,22 @@ const Checkout = () => {
     cvv: ''
   });
 
+  const handleCustomerChange = (e) => {
+    const { name, value } = e.target;
+    setCustomer(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleCardInputChange = (e) => {
     const { name, value } = e.target;
     let formattedValue = value;
     
     if (name === 'number') {
-      // Keep only digits and insert space every 4 digits
       const digits = value.replace(/\D/g, '');
       formattedValue = digits.substring(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
     } else if (name === 'expiry') {
-      // Format MM/YY
       const digits = value.replace(/\D/g, '');
       if (digits.length >= 2) {
         formattedValue = `${digits.substring(0, 2)}/${digits.substring(2, 4)}`;
@@ -37,7 +58,6 @@ const Checkout = () => {
         formattedValue = digits;
       }
     } else if (name === 'cvv') {
-      // Max 3 digits for CVV
       formattedValue = value.replace(/\D/g, '').substring(0, 3);
     }
     
@@ -46,6 +66,117 @@ const Checkout = () => {
       [name]: formattedValue
     }));
   };
+
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    // Validation for card details if selected
+    if (paymentMethod === 'card') {
+      if (!cardDetails.name || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv) {
+        setError('Please fill in all credit card details.');
+        setLoading(false);
+        return;
+      }
+      if (cardDetails.number.replace(/\s/g, '').length < 16) {
+        setError('Please enter a valid 16-digit card number.');
+        setLoading(false);
+        return;
+      }
+      if (cardDetails.expiry.length < 5) {
+        setError('Please enter expiry in MM/YY format.');
+        setLoading(false);
+        return;
+      }
+      if (cardDetails.cvv.length < 3) {
+        setError('Please enter a 3-digit CVV.');
+        setLoading(false);
+        return;
+      }
+    }
+
+    try {
+      // Map frontend items to backend structure
+      const orderItems = items.map(item => ({
+        product: item.id, // item.id contains the MongoDB ObjectId
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image
+      }));
+
+      const payload = {
+        customer,
+        items: orderItems,
+        paymentMethod,
+        cardDetails: paymentMethod === 'card' ? cardDetails : undefined,
+        subtotal,
+        shipping,
+        total
+      };
+
+      const response = await api('/orders/post', {
+        method: 'POST',
+        body: payload
+      });
+
+      if (response.success) {
+        setPlacedOrder(response.order);
+        dispatch(clearCart());
+      } else {
+        setError(response.message || 'Failed to place order. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'An error occurred while placing your order.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (placedOrder) {
+    return (
+      <div className="checkout-page animate-fade-in">
+        <div className="checkout-success-container">
+          <div className="success-icon-wrapper">
+            <Check size={40} />
+          </div>
+          <h1>Order Placed!</h1>
+          <p>Thank you for shopping with us. Your order is being processed.</p>
+
+          <div className="success-details-card">
+            <div className="success-detail-row">
+              <span>Order Number:</span>
+              <strong>{placedOrder.orderId}</strong>
+            </div>
+            <div className="success-detail-row">
+              <span>Customer Name:</span>
+              <strong>{placedOrder.customer?.name}</strong>
+            </div>
+            <div className="success-detail-row">
+              <span>Delivery Address:</span>
+              <strong>{placedOrder.customer?.address}, {placedOrder.customer?.city}</strong>
+            </div>
+            <div className="success-detail-row">
+              <span>Payment Method:</span>
+              <strong>{placedOrder.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Credit Card'}</strong>
+            </div>
+            <div className="success-detail-row">
+              <span>Total Amount:</span>
+              <strong>{formatPrice(placedOrder.total)}</strong>
+            </div>
+          </div>
+
+          <div className="success-actions">
+            <Link to="/" className="primary-btn">
+              Continue Shopping
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -75,40 +206,90 @@ const Checkout = () => {
           </div>
         </header>
 
-        <div className="checkout-grid">
+        {error && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1.5px solid #ef4444',
+            color: '#ef4444',
+            padding: '1rem',
+            borderRadius: 'var(--store-radius)',
+            marginBottom: '2rem',
+            fontWeight: 500,
+            fontSize: '0.95rem'
+          }} className="animate-fade-in">
+            {error}
+          </div>
+        )}
+
+        <form className="checkout-grid" onSubmit={handlePlaceOrder}>
           {/* Step 1: Shipping Address */}
           <section className="checkout-section shipping-address animate-fade-in">
             <div className="section-title">
               <span className="step-number">1</span>
               <h2>Shipping Details</h2>
             </div>
-            <form className="checkout-form" onSubmit={(e) => e.preventDefault()}>
+            <div className="checkout-form">
               <div className="form-group">
                 <label>Full Name *</label>
-                <input type="text" placeholder="e.g. Ayesha Khan" required />
+                <input 
+                  type="text" 
+                  name="name"
+                  placeholder="e.g. Ayesha Khan" 
+                  value={customer.name}
+                  onChange={handleCustomerChange}
+                  required 
+                />
               </div>
               
               <div className="form-row">
                 <div className="form-group">
                   <label>Phone Number *</label>
-                  <input type="tel" placeholder="e.g. 03001234567" required />
+                  <input 
+                    type="tel" 
+                    name="phone"
+                    placeholder="e.g. 03001234567" 
+                    value={customer.phone}
+                    onChange={handleCustomerChange}
+                    required 
+                  />
                 </div>
                 <div className="form-group">
                   <label>Email Address *</label>
-                  <input type="email" placeholder="e.g. ayesha@email.com" required />
+                  <input 
+                    type="email" 
+                    name="email"
+                    placeholder="e.g. ayesha@email.com" 
+                    value={customer.email}
+                    onChange={handleCustomerChange}
+                    required 
+                  />
                 </div>
               </div>
 
               <div className="form-group">
                 <label>Complete Address *</label>
-                <input type="text" placeholder="House/Apartment #, Street, Block, Area" required />
+                <input 
+                  type="text" 
+                  name="address"
+                  placeholder="House/Apartment #, Street, Block, Area" 
+                  value={customer.address}
+                  onChange={handleCustomerChange}
+                  required 
+                />
               </div>
 
               <div className="form-group">
                 <label>City *</label>
-                <input type="text" placeholder="e.g. Karachi, Lahore, Islamabad" required />
+                <input 
+                  type="text" 
+                  name="city"
+                  placeholder="e.g. Karachi, Lahore, Islamabad" 
+                  value={customer.city}
+                  onChange={handleCustomerChange}
+                  required 
+                />
               </div>
-            </form>
+            </div>
           </section>
 
           {/* Step 2: Payment Method */}
@@ -252,9 +433,24 @@ const Checkout = () => {
               </div>
             </div>
 
-            <button className="place-order-btn">Place Order</button>
+            <button 
+              type="submit" 
+              className="place-order-btn"
+              disabled={loading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {loading && <Loader2 size={18} className="animate-spin" />}
+              {loading ? 'Processing...' : 'Place Order'}
+            </button>
           </section>
-        </div>
+        </form>
       </div>
     </div>
   );
