@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../Components/Sidebar';
-import { Search, Bell, Sun, Moon } from 'lucide-react';
+import { Search, Bell, Sun, Moon, ChevronDown } from 'lucide-react';
 import './AdminLayout.css';
+import { useAuth } from '../context/AuthContext';
 
 const AdminLayout = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const location = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     document.body.className = theme;
@@ -16,27 +19,61 @@ const AdminLayout = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
+  const getPageDetails = () => {
+    const path = location.pathname;
+    if (path.endsWith('/products')) {
+      return { title: 'Products', breadcrumb: 'ADMIN > PRODUCTS' };
+    } else if (path.endsWith('/categories')) {
+      return { title: 'Categories', breadcrumb: 'ADMIN > CATEGORIES' };
+    } else if (path.endsWith('/users')) {
+      return { title: 'Users', breadcrumb: 'ADMIN > USERS' };
+    } else if (path.endsWith('/banners')) {
+      return { title: 'Banners', breadcrumb: 'ADMIN > BANNERS' };
+    } else if (path.endsWith('/orders')) {
+      return { title: 'Orders', breadcrumb: 'ADMIN > ORDERS' };
+    } else if (path.endsWith('/profile')) {
+      return { title: 'Profile', breadcrumb: 'ADMIN > PROFILE' };
+    } else if (path.endsWith('/wallet')) {
+      return { title: 'Wallet', breadcrumb: 'ADMIN > WALLET' };
+    } else if (path.endsWith('/settings')) {
+      return { title: 'Settings', breadcrumb: 'ADMIN > SETTINGS' };
+    }
+    return { title: 'Overview', breadcrumb: 'ADMIN > OVERVIEW' };
+  };
+
+  const { title, breadcrumb } = getPageDetails();
+
   return (
     <div className={`admin-layout ${theme}`}>
       <Sidebar />
       <main className="main-wrapper">
-        <header className="top-header">
-          <div className="header-search-container">
-            <div className="header-search">
-              <Search size={20} className="search-icon" />
-              <input type="text" placeholder="Search..." />
-            </div>
-            <button className="theme-toggle-btn" onClick={toggleTheme} title="Toggle Theme">
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
+        <header className="top-header-new">
+          <div className="header-left">
+            <h1 className="header-page-title">{title}</h1>
+            <span className="header-breadcrumb">{breadcrumb}</span>
           </div>
-          <div className="header-actions">
-            <button className="icon-btn">
-              <Bell size={20} />
-              <span className="notification-dot"></span>
+          
+          <div className="header-right">
+            <div className="header-search-new">
+              <Search size={18} className="search-icon" />
+              <input type="text" placeholder="Search dashboard..." />
+            </div>
+
+            <button className="theme-toggle-btn-new" onClick={toggleTheme} title="Toggle Theme">
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <div className="date-picker">
-              <span>This year</span>
+
+            <button className="icon-btn-new" title="Notifications">
+              <Bell size={18} />
+              <span className="notification-dot-new"></span>
+            </button>
+
+            <div className="profile-pill">
+              <div className="profile-avatar">
+                <span className="profile-avatar-text">A</span>
+              </div>
+              <span className="profile-name">{user?.name || 'Alessandro'}</span>
+              <ChevronDown size={14} className="profile-chevron" />
             </div>
           </div>
         </header>
