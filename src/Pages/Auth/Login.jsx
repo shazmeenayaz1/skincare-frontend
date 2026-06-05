@@ -28,6 +28,11 @@ const Login = () => {
             login(data.user, data.token);
         } catch (err) {
             setError(err.message);
+            if (err.message.toLowerCase().includes('verify') || err.message.toLowerCase().includes('verification')) {
+                setTimeout(() => {
+                    navigate('/verify', { state: { email: formData.email } });
+                }, 2000);
+            }
         } finally {
             setLoading(false);
         }

@@ -1,19 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../Components/Sidebar';
 import { Search, Bell, Sun, Moon, ChevronDown } from 'lucide-react';
+import { resolveImageUrl } from '../utils/imageUrl';
 import './AdminLayout.css';
 import { useAuth } from '../context/AuthContext';
 
 const AdminLayout = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const location = useLocation();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     document.body.className = theme;
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        navigate('/login');
+      } else if (user.urole !== 'admin') {
+        navigate('/');
+      }
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0a0a0b', color: 'white' }}>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  if (!user || user.urole !== 'admin') {
+    return null;
+  }
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -69,8 +93,12 @@ const AdminLayout = () => {
             </button>
 
             <div className="profile-pill">
-              <div className="profile-avatar">
-                <span className="profile-avatar-text">A</span>
+              <div className="profile-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {user?.image ? (
+                  <img src={resolveImageUrl(user.image)} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span className="profile-avatar-text">{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
+                )}
               </div>
               <span className="profile-name">{user?.name || 'Alessandro'}</span>
               <ChevronDown size={14} className="profile-chevron" />

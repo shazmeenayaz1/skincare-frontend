@@ -11,12 +11,20 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const { items, subtotal } = useSelector((state) => state.cart);
   const shipping = items.length > 0 ? 250 : 0;
-  const total = subtotal + shipping;
 
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [placedOrder, setPlacedOrder] = useState(null);
+
+  // Coupon states
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [couponError, setCouponError] = useState('');
+  const [couponSuccess, setCouponSuccess] = useState('');
+
+  const total = Math.max(0, subtotal - discount + shipping);
 
   // Shipping details state
   const [customer, setCustomer] = useState({
@@ -67,6 +75,40 @@ const Checkout = () => {
     }));
   };
 
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    setCouponError('');
+    setCouponSuccess('');
+    
+    const code = couponInput.trim().toUpperCase();
+    
+    if (!code) {
+      setCouponError('Please enter a coupon code.');
+      return;
+    }
+    
+    if (code === 'GLOW10') {
+      const disc = Math.round(subtotal * 0.1);
+      setDiscount(disc);
+      setAppliedCoupon(code);
+      setCouponSuccess(`Coupon 'GLOW10' applied! You saved 10% (${formatPrice(disc)}).`);
+    } else if (code === 'GLOW20') {
+      const disc = Math.round(subtotal * 0.2);
+      setDiscount(disc);
+      setAppliedCoupon(code);
+      setCouponSuccess(`Coupon 'GLOW20' applied! You saved 20% (${formatPrice(disc)}).`);
+    } else if (code === 'FREE500') {
+      const disc = Math.min(subtotal, 500);
+      setDiscount(disc);
+      setAppliedCoupon(code);
+      setCouponSuccess(`Coupon 'FREE500' applied! You saved flat ${formatPrice(disc)}.`);
+    } else {
+      setCouponError('Invalid coupon code. Try GLOW10, GLOW20, or FREE500.');
+      setDiscount(0);
+      setAppliedCoupon('');
+    }
+  };
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -113,6 +155,8 @@ const Checkout = () => {
         cardDetails: paymentMethod === 'card' ? cardDetails : undefined,
         subtotal,
         shipping,
+        discount,
+        couponCode: appliedCoupon || undefined,
         total
       };
 
@@ -416,11 +460,65 @@ const Checkout = () => {
               </div>
             </div>
 
+            {/* Coupon Code Input */}
+            <div className="coupon-section" style={{
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: '1.5px dashed var(--store-border)',
+              padding: '1.25rem',
+              borderRadius: 'var(--store-radius)',
+              marginBottom: '1.5rem',
+              marginTop: '1.5rem'
+            }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--store-text)' }}>Have a Promo Code?</h3>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="text" 
+                  placeholder="e.g. GLOW10" 
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    border: '1.5px solid var(--store-border)',
+                    borderRadius: 'var(--store-radius)',
+                    outline: 'none',
+                    fontSize: '0.85rem',
+                    textTransform: 'uppercase',
+                    backgroundColor: 'white'
+                  }}
+                />
+                <button 
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  style={{
+                    backgroundColor: 'var(--store-primary)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: 'var(--store-radius)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  Apply
+                </button>
+              </div>
+              {couponError && <p style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.4rem', fontWeight: 500 }}>{couponError}</p>}
+              {couponSuccess && <p style={{ color: '#16a34a', fontSize: '0.75rem', marginTop: '0.4rem', fontWeight: 500 }}>{couponSuccess}</p>}
+            </div>
+
             <div className="summary-totals">
               <div className="total-row">
                 <span>Cart Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
+              {discount > 0 && (
+                <div className="total-row discount-row" style={{ color: '#16a34a', fontWeight: 500 }}>
+                  <span>Discount ({appliedCoupon})</span>
+                  <span>-{formatPrice(discount)}</span>
+                </div>
+              )}
               <div className="total-row">
                 <span>Shipping <small>Flat Rate</small></span>
                 <span>{formatPrice(shipping)}</span>

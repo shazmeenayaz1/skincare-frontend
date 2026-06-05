@@ -1,16 +1,18 @@
-import React from 'react';
-import { Search, User, ShoppingCart, LayoutDashboard } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, User, ShoppingCart, ChevronDown } from 'lucide-react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
 import { toggleDrawer } from '../features/cartSlice';
+import { resolveImageUrl } from '../utils/imageUrl';
 import './Navbar.css';
 
 const Navbar = () => {
   const { totalQuantity } = useSelector((state) => state.cart);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -59,9 +61,55 @@ const Navbar = () => {
 
         <div className="navbar-actions">
           {user ? (
-            <Link to="/admin" className="action-btn" title="Account">
-              <User size={24} strokeWidth={1.5} />
-            </Link>
+            <div className="navbar-user-dropdown">
+              <button 
+                type="button" 
+                className="user-dropdown-toggle-btn"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                {user.image ? (
+                  <img 
+                    src={resolveImageUrl(user.image)} 
+                    alt={user.name} 
+                    className="navbar-avatar-img" 
+                  />
+                ) : (
+                  <span className="navbar-avatar-initial">
+                    {user.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span className="navbar-user-name">{user.name}</span>
+                <ChevronDown size={14} />
+              </button>
+              
+              {dropdownOpen && (
+                <div className="navbar-dropdown-menu animate-fade-in">
+                  <Link 
+                    to="/profile" 
+                    className="navbar-dropdown-item"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Edit Profile
+                  </Link>
+                  <Link 
+                    to="/admin" 
+                    className="navbar-dropdown-item"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Admin Panel
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      logout();
+                    }} 
+                    className="navbar-dropdown-item logout-btn-nav"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link to="/login" className="nav-auth-link">
@@ -72,9 +120,7 @@ const Navbar = () => {
               </Link>
             </>
           )}
-          <Link to="/admin" className="action-btn" title="Admin Panel">
-            <LayoutDashboard size={24} strokeWidth={1.5} />
-          </Link>
+
           <button
             type="button"
             className="action-btn cart-btn"
