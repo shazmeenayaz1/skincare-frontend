@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import { User, Mail, Shield, Save, Loader2, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Shield, Save, Loader2, CheckCircle2, Phone, Camera } from 'lucide-react';
+import { resolveImageUrl } from '../../utils/imageUrl';
 import './Profile.css';
 
 const Profile = () => {
     const { user, setUser } = useAuth();
-    const [formData, setFormData] = useState({ name: '', email: '' });
+    const [formData, setFormData] = useState({ name: '', phone: '', image: null });
     const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [loading, setLoading] = useState(false);
     const [passLoading, setPassLoading] = useState(false);
@@ -14,7 +15,11 @@ const Profile = () => {
 
     useEffect(() => {
         if (user) {
-            setFormData({ name: user.name, email: user.email });
+            setFormData({
+                name: user.name || '',
+                phone: user.phone || '',
+                image: null
+            });
         }
     }, [user]);
 
@@ -23,9 +28,16 @@ const Profile = () => {
         setLoading(true);
         setMessage({ type: '', text: '' });
         try {
+            const body = new FormData();
+            body.append('name', formData.name);
+            body.append('phone', formData.phone);
+            if (formData.image) {
+                body.append('image', formData.image);
+            }
+
             const data = await api('/users/profile', {
                 method: 'PUT',
-                body: formData,
+                body: body,
             });
             setUser(data.data);
             setMessage({ type: 'success', text: 'Profile updated successfully' });
@@ -78,6 +90,23 @@ const Profile = () => {
                 <div className="profile-card">
                     <h2>Personal Information</h2>
                     <form onSubmit={handleProfileSubmit}>
+                        {user && user.image && (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
+                                <img 
+                                    src={resolveImageUrl(user.image)} 
+                                    alt={user.name} 
+                                    style={{ 
+                                        width: '100px', 
+                                        height: '100px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover', 
+                                        border: '3px solid var(--store-primary)',
+                                        boxShadow: 'var(--store-shadow)'
+                                    }} 
+                                />
+                                <span style={{ fontSize: '0.85rem', color: 'var(--store-text-muted)', marginTop: '8px' }}>Current Profile Photo</span>
+                            </div>
+                        )}
                         <div className="form-group">
                             <label>Full Name</label>
                             <div className="input-group">
@@ -91,14 +120,38 @@ const Profile = () => {
                             </div>
                         </div>
                         <div className="form-group">
-                            <label>Email Address</label>
+                            <label>Email Address (Cannot be updated)</label>
                             <div className="input-group">
                                 <Mail size={18} />
                                 <input
                                     type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    value={user ? user.email : ''}
+                                    disabled
+                                    style={{ opacity: 0.6, cursor: 'not-allowed', backgroundColor: 'rgba(0,0,0,0.05)' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label>Phone Number</label>
+                            <div className="input-group">
+                                <Phone size={18} />
+                                <input
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     required
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label>Update Profile Photo</label>
+                            <div className="input-group">
+                                <Camera size={18} />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+                                    style={{ paddingTop: '10px' }}
                                 />
                             </div>
                         </div>

@@ -1,47 +1,124 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash, X, Shield, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash, X, Shield, Mail, Loader2, Phone, Key } from 'lucide-react';
+import api from '../../utils/api';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 const Users = () => {
-  const [users, setUsers] = useState([
-    { id: 1, name: 'Jane Cooper', email: 'jane.c@example.com', role: 'Admin', status: 'Active' },
-    { id: 2, name: 'Robert Fox', email: 'robert.f@example.com', role: 'Editor', status: 'Inactive' },
-    { id: 3, name: 'Esther Howard', email: 'esther.h@example.com', role: 'Viewer', status: 'Active' },
-  ]);
-
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'Viewer', status: 'Active' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    password: '', 
+    role: 'Viewer', 
+    status: 'Active' 
+  });
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await api('/users');
+      setUsers(res.data || []);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to load users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleOpenModal = (user = null) => {
     if (user) {
       setEditingUser(user);
-      setFormData({ name: user.name, email: user.email, role: user.role, status: user.status });
+      // Map urole to Admin/Viewer
+      const displayRole = user.urole === 'admin' ? 'Admin' : 'Viewer';
+      // Map verifystatus to Active/Inactive
+      const displayStatus = user.verifystatus ? 'Active' : 'Inactive';
+      
+      setFormData({ 
+        name: user.name || '', 
+        email: user.email || '', 
+        phone: user.phone || '', 
+        password: '', // Leave blank for edit unless they want to set new password
+        role: displayRole, 
+        status: displayStatus 
+      });
     } else {
       setEditingUser(null);
-      setFormData({ name: '', email: '', role: 'Viewer', status: 'Active' });
+      setFormData({ 
+        name: '', 
+        email: '', 
+        phone: '', 
+        password: '', 
+        role: 'Viewer', 
+        status: 'Active' 
+      });
     }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => setIsModalOpen(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } : u));
-    } else {
-      const newUser = {
-        id: Date.now(),
-        ...formData
-      };
-      setUsers([...users, newUser]);
+    setSubmitLoading(true);
+    setError('');
+    try {
+      if (editingUser) {
+        // Update user
+        await api(`/users/${editingUser._id}`, {
+          method: 'PUT',
+          body: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            role: formData.role,
+            status: formData.status
+          }
+        });
+      } else {
+        // Create user
+        await api('/users', {
+          method: 'POST',
+          body: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password || 'password123',
+            role: formData.role,
+            status: formData.status
+          }
+        });
+      }
+      fetchUsers();
+      handleCloseModal();
+    } catch (err) {
+      setError(err.message || 'Failed to save user');
+    } finally {
+      setSubmitLoading(false);
     }
-    handleCloseModal();
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(u => u.id !== id));
+      try {
+        await api(`/users/${id}`, {
+          method: 'DELETE'
+        });
+        fetchUsers();
+      } catch (err) {
+        alert(err.message || 'Failed to delete user');
+      }
     }
   };
 
@@ -57,55 +134,86 @@ const Users = () => {
         </button>
       </div>
 
-      <div className="glass-card table-section">
-        <table>
-          <thead>
-            <tr>
-              <th>USER</th>
-              <th>ROLE</th>
-              <th>STATUS</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>
-                  <div className="user-td">
-                    <div className="avatar-small">
-                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} alt="" />
-                    </div>
-                    <div className="user-details">
-                      <span className="user-name-cell">{user.name}</span>
-                      <span className="user-email-cell">{user.email}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span className="role-badge">
-                    <Shield size={12} /> {user.role}
-                  </span>
-                </td>
-                <td>
-                  <span className={`status-dot ${user.status.toLowerCase()}`}></span>
-                  {user.status}
-                </td>
-                <td>
-                  <div className="action-btns">
-                    <button className="icon-btn-small" onClick={() => handleOpenModal(user)}>
-                      <Edit2 size={16} />
-                    </button>
-                    <button className="delete-btn" onClick={() => handleDelete(user.id)}>
-                      <Trash size={16} />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </td>
+      {error && <div className="profile-alert error" style={{ marginBottom: 20 }}>{error}</div>}
+
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
+          <Loader2 className="animate-spin" size={40} style={{ color: 'var(--accent-purple)' }} />
+        </div>
+      ) : (
+        <div className="glass-card table-section">
+          <table>
+            <thead>
+              <tr>
+                <th>USER</th>
+                <th>ROLE</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id}>
+                  <td>
+                    <div className="user-td">
+                      <div className="avatar-small">
+                        {user.image ? (
+                          <img src={resolveImageUrl(user.image)} alt={user.name} />
+                        ) : (
+                          <div style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'var(--accent-purple)',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '0.9rem'
+                          }}>
+                            {user.name?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="user-details">
+                        <span className="user-name-cell">{user.name}</span>
+                        <span className="user-email-cell">{user.email}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="role-badge">
+                      <Shield size={12} /> {user.urole === 'admin' ? 'Admin' : 'User'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`status-dot ${user.verifystatus ? 'active' : 'inactive'}`}></span>
+                    {user.verifystatus ? 'Verified' : 'Unverified'}
+                  </td>
+                  <td>
+                    <div className="action-btns">
+                      <button className="icon-btn-small" onClick={() => handleOpenModal(user)}>
+                        <Edit2 size={16} />
+                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(user._id)}>
+                        <Trash size={16} />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                    No users found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay">
@@ -135,6 +243,37 @@ const Users = () => {
                   required 
                 />
               </div>
+              <div className="form-group">
+                <label>Phone Number</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Phone size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+                  <input 
+                    type="tel" 
+                    value={formData.phone} 
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+                    placeholder="+1 (555) 000-0000"
+                    style={{ paddingLeft: '36px' }}
+                    required 
+                  />
+                </div>
+              </div>
+              
+              {!editingUser && (
+                <div className="form-group">
+                  <label>Password (Temporary)</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Key size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+                    <input 
+                      type="password" 
+                      value={formData.password} 
+                      onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                      placeholder="Password (default: password123)"
+                      style={{ paddingLeft: '36px' }}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="row">
                 <div className="form-group">
                   <label>Role</label>
@@ -143,8 +282,7 @@ const Users = () => {
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                   >
                     <option value="Admin">Admin</option>
-                    <option value="Editor">Editor</option>
-                    <option value="Viewer">Viewer</option>
+                    <option value="Viewer">User</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -153,14 +291,16 @@ const Users = () => {
                     value={formData.status} 
                     onChange={(e) => setFormData({...formData, status: e.target.value})}
                   >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
+                    <option value="Active">Verified</option>
+                    <option value="Inactive">Unverified</option>
                   </select>
                 </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="secondary" onClick={handleCloseModal}>Cancel</button>
-                <button type="submit" className="primary" style={{ backgroundColor: 'var(--accent-purple)' }}>Save User</button>
+                <button type="submit" className="primary" style={{ backgroundColor: 'var(--accent-purple)' }} disabled={submitLoading}>
+                  {submitLoading ? <Loader2 className="animate-spin" size={18} /> : 'Save User'}
+                </button>
               </div>
             </form>
           </div>
@@ -196,7 +336,6 @@ const Users = () => {
         .user-name-cell {
           font-weight: 600;
           color: var(--text-primary);
-
         }
 
         .user-email-cell {
@@ -233,7 +372,6 @@ const Users = () => {
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid var(--glass-border);
           color: var(--text-primary);
-
           width: 36px;
           height: 36px;
           border-radius: 10px;
@@ -287,6 +425,7 @@ const Users = () => {
           z-index: 1000;
           padding: 80px 20px;
           animation: fadeIn 0.3s ease-out;
+          overflow-y: auto;
         }
 
         .modal-content {
@@ -295,6 +434,23 @@ const Users = () => {
           padding: 40px;
           position: relative;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content input, .modal-content select {
+          width: 100%;
+          padding: 12px 14px;
+          background: var(--sidebar-bg);
+          border: 1px solid var(--glass-border);
+          border-radius: 12px;
+          color: var(--text-primary);
+          font-size: 15px;
+          outline: none;
+          transition: all 0.3s;
+        }
+
+        .modal-content input:focus, .modal-content select:focus {
+          border-color: var(--accent-purple);
+          background: var(--card-bg);
         }
 
         .modal-header {

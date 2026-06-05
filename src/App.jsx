@@ -8,6 +8,8 @@ import Users from './Pages/Users/Users';
 import Banners from './Pages/Banners/Banners';
 import Login from './Pages/Auth/Login';
 import Register from './Pages/Auth/Register';
+import VerifyUser from './Pages/Auth/VerifyUser';
+import UserProfile from './Pages/Auth/UserProfile';
 import ForgotPassword from './Pages/Auth/ForgotPassword';
 import ResetPassword from './Pages/Auth/ResetPassword';
 import Profile from './Pages/Users/Profile';
@@ -51,8 +53,10 @@ function App() {
           <Route element={<StoreLayout />}>
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="verify" element={<VerifyUser />} />
             <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="reset-password" element={<ResetPassword />} />
+            <Route path="profile" element={<UserProfile />} />
           </Route>
 
           {/* Admin Routes */}

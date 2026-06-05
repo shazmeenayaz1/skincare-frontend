@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import { Mail, Lock, User, Loader2, UserPlus } from 'lucide-react';
+import { Mail, Lock, User, Loader2, UserPlus, Phone, Camera } from 'lucide-react';
 import './Auth.css';
 
 const Register = () => {
-    const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        image: null
+    });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -17,15 +21,32 @@ const Register = () => {
         if (error) setError('');
     };
 
+    const handleFileChange = (e) => {
+        setFormData({ ...formData, image: e.target.files[0] });
+        if (error) setError('');
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
         try {
-            const data = await api('/auth/register', {
+            const body = new FormData();
+            body.append('name', formData.name);
+            body.append('email', formData.email);
+            body.append('phone', formData.phone);
+            body.append('password', formData.password);
+            if (formData.image) {
+                body.append('image', formData.image);
+            }
+
+            await api('/auth/register', {
                 method: 'POST',
-                body: formData,
+                body: body,
             });
-            login(data.user, data.token);
+
+            // Redirect to verify email route, passing email in state
+            navigate('/verify', { state: { email: formData.email } });
         } catch (err) {
             setError(err.message);
         } finally {
@@ -78,6 +99,21 @@ const Register = () => {
                     </div>
 
                     <div className="form-group">
+                        <label>Phone Number</label>
+                        <div className="input-with-icon">
+                            <Phone size={18} className="input-icon" />
+                            <input
+                                type="tel"
+                                name="phone"
+                                placeholder="+1 (555) 000-0000"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
                         <label>Password</label>
                         <div className="input-with-icon">
                             <Lock size={18} className="input-icon" />
@@ -88,6 +124,20 @@ const Register = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Profile Image (Optional)</label>
+                        <div className="input-with-icon">
+                            <Camera size={18} className="input-icon" style={{ zIndex: 10 }} />
+                            <input
+                                type="file"
+                                name="image"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ paddingLeft: '42px', paddingTop: '10px' }}
                             />
                         </div>
                     </div>
