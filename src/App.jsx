@@ -15,6 +15,7 @@ import ResetPassword from './Pages/Auth/ResetPassword';
 import Profile from './Pages/Users/Profile';
 import { AuthProvider } from './context/AuthContext';
 import Orders from './Pages/Orders/Orders';
+import MyOrders from './Pages/Orders/MyOrders';
 
 
 // Placeholder components for other links
@@ -57,6 +58,7 @@ function App() {
             <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="reset-password" element={<ResetPassword />} />
             <Route path="profile" element={<UserProfile />} />
+            <Route path="my-orders" element={<MyOrders />} />
           </Route>
 
           {/* Admin Routes */}
