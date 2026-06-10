@@ -266,13 +266,23 @@ const Orders = () => {
                         {selectedOrder.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'Credit Card'}
                       </span>
                     </div>
-                    {selectedOrder.paymentMethod === 'card' && selectedOrder.cardDetails && (
-                      <div className="info-detail-item">
-                        <span className="info-label">Card Details</span>
-                        <span className="info-val">
-                          {selectedOrder.cardDetails.name} ({selectedOrder.cardDetails.number})
-                        </span>
-                      </div>
+                    {selectedOrder.paymentMethod === 'card' && (
+                      <>
+                        {selectedOrder.paymentStatus === 'paid' && (
+                          <div className="info-detail-item">
+                            <span className="info-label">Payment Status</span>
+                            <span className="info-val" style={{ color: '#16a34a' }}>Paid via Stripe</span>
+                          </div>
+                        )}
+                        {selectedOrder.cardDetails && (
+                          <div className="info-detail-item">
+                            <span className="info-label">Card Details</span>
+                            <span className="info-val">
+                              {selectedOrder.cardDetails.name} ({selectedOrder.cardDetails.number})
+                            </span>
+                          </div>
+                        )}
+                      </>
                     )}
                     <div className="info-detail-item" style={{ marginTop: '8px' }}>
                       <span className="info-label">Order Status</span>

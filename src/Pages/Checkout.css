@@ -240,6 +240,49 @@
   margin-bottom: 1.5rem;
 }
 
+.stripe-payment-wrapper {
+  margin-top: 0.5rem;
+}
+
+.stripe-secure-note {
+  font-size: 0.8rem;
+  color: var(--store-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.stripe-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  color: var(--store-text-secondary);
+  font-size: 0.9rem;
+}
+
+.stripe-error {
+  padding: 1rem;
+  border-radius: var(--store-radius);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.stripe-error p {
+  margin: 0 0 0.75rem;
+}
+
+.stripe-retry-btn {
+  background: var(--store-primary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--store-radius);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
 .input-with-icon {
   position: relative;
   display: flex;

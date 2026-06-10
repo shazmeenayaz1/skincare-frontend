@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { ChevronRight, ArrowLeft, CreditCard, Check, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { formatPrice } from '../utils/cartUtils';
 import { clearCart } from '../features/cartSlice';
+import { useAuth } from '../context/AuthContext';
+import StripeCardPayment from '../Components/StripeCardPayment';
 import api from '../utils/api';
 import './Checkout.css';
 
 const Checkout = () => {
   const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { items, subtotal } = useSelector((state) => state.cart);
   const shipping = items.length > 0 ? 250 : 0;
 
@@ -17,7 +20,6 @@ const Checkout = () => {
   const [error, setError] = useState('');
   const [placedOrder, setPlacedOrder] = useState(null);
 
-  // Coupon states
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [discount, setDiscount] = useState(0);
@@ -26,22 +28,82 @@ const Checkout = () => {
 
   const total = Math.max(0, subtotal - discount + shipping);
 
-  // Shipping details state
+  const { user } = useAuth();
+
   const [customer, setCustomer] = useState({
-    name: '',
-    phone: '',
-    email: '',
+    name: user?.name || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
     address: '',
     city: ''
   });
 
-  // Card details state for premium interactive experience
-  const [cardDetails, setCardDetails] = useState({
-    name: '',
-    number: '',
-    expiry: '',
-    cvv: ''
-  });
+  useEffect(() => {
+    if (user) {
+      setCustomer(prev => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        phone: prev.phone || user.phone || '',
+        email: prev.email || user.email || ''
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      const paymentIntentId = searchParams.get('payment_intent');
+      const redirectStatus = searchParams.get('redirect_status');
+
+      if (paymentIntentId && redirectStatus === 'succeeded') {
+        const savedDataStr = sessionStorage.getItem('pending_checkout_data');
+        if (savedDataStr) {
+          try {
+            setLoading(true);
+            const savedData = JSON.parse(savedDataStr);
+            
+            const payload = {
+              customer: savedData.customer,
+              items: savedData.items,
+              paymentMethod: 'card',
+              stripePaymentIntentId: paymentIntentId,
+              subtotal: savedData.subtotal,
+              shipping: savedData.shipping,
+              discount: savedData.discount,
+              couponCode: savedData.appliedCoupon || undefined,
+              total: savedData.total
+            };
+
+            const response = await api('/orders/post', {
+              method: 'POST',
+              body: payload
+            });
+
+            if (response.success) {
+              setPlacedOrder(response.order);
+              dispatch(clearCart());
+              sessionStorage.removeItem('pending_checkout_data');
+              setSearchParams({}, { replace: true });
+            } else {
+              setError(response.message || 'Failed to place order. Please contact support.');
+            }
+          } catch (err) {
+            console.error('Error processing redirected order:', err);
+            setError('An error occurred while placing your order after payment.');
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          setError('Payment details were found but checkout information was missing. Please contact support.');
+        }
+      } else if (redirectStatus && redirectStatus !== 'succeeded') {
+        setError('Payment was not successful. Please try again.');
+        sessionStorage.removeItem('pending_checkout_data');
+        setSearchParams({}, { replace: true });
+      }
+    };
+
+    handleRedirectResult();
+  }, [searchParams, setSearchParams, dispatch]);
 
   const handleCustomerChange = (e) => {
     const { name, value } = e.target;
@@ -51,42 +113,18 @@ const Checkout = () => {
     }));
   };
 
-  const handleCardInputChange = (e) => {
-    const { name, value } = e.target;
-    let formattedValue = value;
-    
-    if (name === 'number') {
-      const digits = value.replace(/\D/g, '');
-      formattedValue = digits.substring(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
-    } else if (name === 'expiry') {
-      const digits = value.replace(/\D/g, '');
-      if (digits.length >= 2) {
-        formattedValue = `${digits.substring(0, 2)}/${digits.substring(2, 4)}`;
-      } else {
-        formattedValue = digits;
-      }
-    } else if (name === 'cvv') {
-      formattedValue = value.replace(/\D/g, '').substring(0, 3);
-    }
-    
-    setCardDetails(prev => ({
-      ...prev,
-      [name]: formattedValue
-    }));
-  };
-
   const handleApplyCoupon = (e) => {
     e.preventDefault();
     setCouponError('');
     setCouponSuccess('');
-    
+
     const code = couponInput.trim().toUpperCase();
-    
+
     if (!code) {
       setCouponError('Please enter a coupon code.');
       return;
     }
-    
+
     if (code === 'GLOW10') {
       const disc = Math.round(subtotal * 0.1);
       setDiscount(disc);
@@ -109,68 +147,101 @@ const Checkout = () => {
     }
   };
 
+  const validateShipping = () => {
+    if (!customer.name || !customer.phone || !customer.email || !customer.address || !customer.city) {
+      setError('Please fill in all shipping details.');
+      return false;
+    }
+    return true;
+  };
+
+  const submitOrder = useCallback(async (stripePaymentIntentId = null) => {
+    const orderItems = items.map(item => ({
+      product: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.image
+    }));
+
+    const payload = {
+      customer,
+      items: orderItems,
+      paymentMethod,
+      stripePaymentIntentId: paymentMethod === 'card' ? stripePaymentIntentId : undefined,
+      subtotal,
+      shipping,
+      discount,
+      couponCode: appliedCoupon || undefined,
+      total
+    };
+
+    const response = await api('/orders/post', {
+      method: 'POST',
+      body: payload
+    });
+
+    if (response.success) {
+      setPlacedOrder(response.order);
+      dispatch(clearCart());
+      sessionStorage.removeItem('pending_checkout_data');
+    } else {
+      setError(response.message || 'Failed to place order. Please try again.');
+    }
+  }, [items, customer, paymentMethod, subtotal, shipping, discount, appliedCoupon, total, dispatch]);
+
+  const handleStripePaymentSuccess = async (paymentIntentId) => {
+    try {
+      await submitOrder(paymentIntentId);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Payment succeeded but order creation failed. Please contact support.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
-    // Validation for card details if selected
-    if (paymentMethod === 'card') {
-      if (!cardDetails.name || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv) {
-        setError('Please fill in all credit card details.');
-        setLoading(false);
-        return;
-      }
-      if (cardDetails.number.replace(/\s/g, '').length < 16) {
-        setError('Please enter a valid 16-digit card number.');
-        setLoading(false);
-        return;
-      }
-      if (cardDetails.expiry.length < 5) {
-        setError('Please enter expiry in MM/YY format.');
-        setLoading(false);
-        return;
-      }
-      if (cardDetails.cvv.length < 3) {
-        setError('Please enter a 3-digit CVV.');
-        setLoading(false);
-        return;
-      }
+    if (!validateShipping()) {
+      return;
     }
 
-    try {
-      // Map frontend items to backend structure
-      const orderItems = items.map(item => ({
-        product: item.id, // item.id contains the MongoDB ObjectId
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image
-      }));
-
-      const payload = {
+    if (paymentMethod === 'card') {
+      setLoading(true);
+      // Save checkout details to sessionStorage in case Stripe redirects
+      sessionStorage.setItem('pending_checkout_data', JSON.stringify({
         customer,
-        items: orderItems,
-        paymentMethod,
-        cardDetails: paymentMethod === 'card' ? cardDetails : undefined,
+        items: items.map(item => ({
+          product: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image
+        })),
+        paymentMethod: 'card',
         subtotal,
         shipping,
         discount,
-        couponCode: appliedCoupon || undefined,
+        appliedCoupon,
         total
-      };
+      }));
 
-      const response = await api('/orders/post', {
-        method: 'POST',
-        body: payload
-      });
-
-      if (response.success) {
-        setPlacedOrder(response.order);
-        dispatch(clearCart());
+      const stripeForm = document.getElementById('stripe-payment-form');
+      if (stripeForm) {
+        stripeForm.requestSubmit();
       } else {
-        setError(response.message || 'Failed to place order. Please try again.');
+        setError('Payment form is still loading. Please wait a moment.');
+        setLoading(false);
       }
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await submitOrder();
     } catch (err) {
       console.error(err);
       setError(err.message || 'An error occurred while placing your order.');
@@ -204,8 +275,14 @@ const Checkout = () => {
             </div>
             <div className="success-detail-row">
               <span>Payment Method:</span>
-              <strong>{placedOrder.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Credit Card'}</strong>
+              <strong>{placedOrder.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Credit Card (Stripe)'}</strong>
             </div>
+            {placedOrder.paymentMethod === 'card' && placedOrder.paymentStatus === 'paid' && (
+              <div className="success-detail-row">
+                <span>Payment Status:</span>
+                <strong style={{ color: '#16a34a' }}>Paid</strong>
+              </div>
+            )}
             <div className="success-detail-row">
               <span>Total Amount:</span>
               <strong>{formatPrice(placedOrder.total)}</strong>
@@ -266,7 +343,6 @@ const Checkout = () => {
         )}
 
         <form className="checkout-grid" onSubmit={handlePlaceOrder}>
-          {/* Step 1: Shipping Address */}
           <section className="checkout-section shipping-address animate-fade-in">
             <div className="section-title">
               <span className="step-number">1</span>
@@ -275,68 +351,67 @@ const Checkout = () => {
             <div className="checkout-form">
               <div className="form-group">
                 <label>Full Name *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="name"
-                  placeholder="e.g. Ayesha Khan" 
+                  placeholder="e.g. Ayesha Khan"
                   value={customer.name}
                   onChange={handleCustomerChange}
-                  required 
+                  required
                 />
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Phone Number *</label>
-                  <input 
-                    type="tel" 
+                  <input
+                    type="tel"
                     name="phone"
-                    placeholder="e.g. 03001234567" 
+                    placeholder="e.g. 03001234567"
                     value={customer.phone}
                     onChange={handleCustomerChange}
-                    required 
+                    required
                   />
                 </div>
                 <div className="form-group">
                   <label>Email Address *</label>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     name="email"
-                    placeholder="e.g. ayesha@email.com" 
+                    placeholder="e.g. ayesha@email.com"
                     value={customer.email}
                     onChange={handleCustomerChange}
-                    required 
+                    required
                   />
                 </div>
               </div>
 
               <div className="form-group">
                 <label>Complete Address *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="address"
-                  placeholder="House/Apartment #, Street, Block, Area" 
+                  placeholder="House/Apartment #, Street, Block, Area"
                   value={customer.address}
                   onChange={handleCustomerChange}
-                  required 
+                  required
                 />
               </div>
 
               <div className="form-group">
                 <label>City *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="city"
-                  placeholder="e.g. Karachi, Lahore, Islamabad" 
+                  placeholder="e.g. Karachi, Lahore, Islamabad"
                   value={customer.city}
                   onChange={handleCustomerChange}
-                  required 
+                  required
                 />
               </div>
             </div>
           </section>
 
-          {/* Step 2: Payment Method */}
           <section className="checkout-section payment-method animate-fade-in">
             <div className="section-title">
               <span className="step-number">2</span>
@@ -344,12 +419,12 @@ const Checkout = () => {
             </div>
             <div className="options-list">
               <label className={`option-item ${paymentMethod === 'cod' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="payment" 
-                  value="cod" 
-                  checked={paymentMethod === 'cod'} 
-                  onChange={() => setPaymentMethod('cod')} 
+                <input
+                  type="radio"
+                  name="payment"
+                  value="cod"
+                  checked={paymentMethod === 'cod'}
+                  onChange={() => setPaymentMethod('cod')}
                 />
                 <div className="option-details">
                   <span className="option-name">Cash on Delivery (COD)</span>
@@ -358,81 +433,41 @@ const Checkout = () => {
               </label>
 
               <label className={`option-item ${paymentMethod === 'card' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="payment" 
-                  value="card" 
-                  checked={paymentMethod === 'card'} 
-                  onChange={() => setPaymentMethod('card')} 
+                <input
+                  type="radio"
+                  name="payment"
+                  value="card"
+                  checked={paymentMethod === 'card'}
+                  onChange={() => setPaymentMethod('card')}
                 />
                 <div className="option-details">
                   <span className="option-name">Debit / Credit Card</span>
-                  <span className="option-desc">Pay securely online via Visa/Mastercard</span>
+                  <span className="option-desc">Pay securely online via Stripe (Visa/Mastercard)</span>
                 </div>
               </label>
             </div>
 
             {paymentMethod === 'card' && (
-              <div className="card-input-form animate-fade-in">
-                <div className="form-group">
-                  <label>Cardholder Name</label>
-                  <input 
-                    type="text" 
-                    name="name" 
-                    placeholder="Name on Card" 
-                    value={cardDetails.name}
-                    onChange={handleCardInputChange} 
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Card Number</label>
-                  <div className="input-with-icon">
-                    <input 
-                      type="text" 
-                      name="number" 
-                      placeholder="0000 0000 0000 0000" 
-                      value={cardDetails.number}
-                      onChange={handleCardInputChange}
-                      maxLength={19} 
-                    />
-                    <CreditCard size={18} className="input-icon" />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Expiry Date</label>
-                    <input 
-                      type="text" 
-                      name="expiry" 
-                      placeholder="MM/YY" 
-                      value={cardDetails.expiry}
-                      onChange={handleCardInputChange}
-                      maxLength={5} 
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>CVV / CVC</label>
-                    <input 
-                      type="password" 
-                      name="cvv" 
-                      placeholder="123" 
-                      value={cardDetails.cvv}
-                      onChange={handleCardInputChange}
-                      maxLength={3} 
-                    />
-                  </div>
-                </div>
+              <div className="card-input-form stripe-payment-wrapper animate-fade-in">
+                <p className="stripe-secure-note">Your card details are processed securely by Stripe.</p>
+                <StripeCardPayment
+                  amount={total}
+                  email={customer.email}
+                  onPaymentSuccess={handleStripePaymentSuccess}
+                  onError={setError}
+                  loading={loading}
+                  setLoading={setLoading}
+                />
               </div>
             )}
           </section>
 
-          {/* Step 3: Order Summary */}
           <section className="checkout-section order-summary animate-fade-in">
             <div className="section-title">
               <span className="step-number">3</span>
               <h2>Order Summary</h2>
             </div>
-            
+
             <div className="items-in-cart">
               <div className="summary-items-header">
                 <span>{items.length} ITEMS IN CART</span>
@@ -460,7 +495,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Coupon Code Input */}
             <div className="coupon-section" style={{
               background: 'rgba(255, 255, 255, 0.5)',
               border: '1.5px dashed var(--store-border)',
@@ -471,9 +505,9 @@ const Checkout = () => {
             }}>
               <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--store-text)' }}>Have a Promo Code?</h3>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input 
-                  type="text" 
-                  placeholder="e.g. GLOW10" 
+                <input
+                  type="text"
+                  placeholder="e.g. GLOW10"
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
                   style={{
@@ -487,7 +521,7 @@ const Checkout = () => {
                     backgroundColor: 'white'
                   }}
                 />
-                <button 
+                <button
                   type="button"
                   onClick={handleApplyCoupon}
                   style={{
@@ -531,8 +565,8 @@ const Checkout = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="place-order-btn"
               disabled={loading}
               style={{
@@ -545,7 +579,11 @@ const Checkout = () => {
               }}
             >
               {loading && <Loader2 size={18} className="animate-spin" />}
-              {loading ? 'Processing...' : 'Place Order'}
+              {loading
+                ? 'Processing...'
+                : paymentMethod === 'card'
+                  ? `Pay ${formatPrice(total)}`
+                  : 'Place Order'}
             </button>
           </section>
         </form>

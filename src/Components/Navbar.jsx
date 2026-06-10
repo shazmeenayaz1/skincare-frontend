@@ -92,6 +92,13 @@ const Navbar = () => {
                     Edit Profile
                   </Link>
                   <Link 
+                    to="/my-orders" 
+                    className="navbar-dropdown-item"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    My Orders
+                  </Link>
+                  <Link 
                     to="/admin" 
                     className="navbar-dropdown-item"
                     onClick={() => setDropdownOpen(false)}
