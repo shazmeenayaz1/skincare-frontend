@@ -16,10 +16,8 @@ const HomeLayout = () => {
   const { status: bannerStatus } = useSelector((state) => state.banners);
 
   useEffect(() => {
-    document.body.classList.add('light');
-    return () => {
-      document.body.classList.remove('light');
-    };
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.className = savedTheme;
   }, []);
 
   useEffect(() => {

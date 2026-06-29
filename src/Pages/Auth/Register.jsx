@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { Mail, Lock, User, Loader2, UserPlus, Phone, Camera } from 'lucide-react';
+import GoogleSignIn from '../../Components/GoogleSignIn';
 import './Auth.css';
 
 const Register = () => {
@@ -146,6 +147,8 @@ const Register = () => {
                         {loading ? <Loader2 className="animate-spin" /> : 'Create Account'}
                     </button>
                 </form>
+
+                <GoogleSignIn onError={setError} setLoading={setLoading} />
 
                 <div className="auth-footer">
                     <p>Already have an account? <Link to="/login">Sign in</Link></p>

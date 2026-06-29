@@ -13,8 +13,8 @@ const StoreLayout = () => {
   const { status: prodStatus } = useSelector((state) => state.products);
 
   useEffect(() => {
-    document.body.classList.add('light');
-    return () => document.body.classList.remove('light');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.className = savedTheme;
   }, []);
 
   useEffect(() => {

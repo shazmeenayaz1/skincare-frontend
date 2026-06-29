@@ -1,6 +1,6 @@
 .product-card {
   position: relative;
-  background: white;
+  background: var(--store-surface);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -36,8 +36,8 @@
 
 .card-image-wrapper {
   position: relative;
-  background: #f8f8f8;
-  border: 1px solid #eee;
+  background: var(--store-surface-alt);
+  border: 1px solid var(--store-border-light);
   border-radius: 12px;
   aspect-ratio: 1 / 1;
   display: flex;
@@ -118,7 +118,7 @@
 .product-name {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #333;
+  color: var(--store-text);
   margin: 0;
   line-height: 1.4;
   height: 2.8rem;
@@ -141,7 +141,7 @@
 
 .review-count {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--store-text-muted);
 }
 
 .price-row {
@@ -159,12 +159,12 @@
 .discount-price {
   font-size: 1rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--store-text);
 }
 
 .pay-now-badge {
   margin-top: 8px;
-  background: #fff0f7;
+  background: var(--store-surface-alt);
   border-radius: 4px;
   padding: 4px 8px;
   display: flex;

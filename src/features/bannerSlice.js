@@ -67,8 +67,15 @@ const bannerSlice = createSlice({
     items: [],
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    actionStatus: 'idle', // for create/update/delete operations
+    actionError: null,
   },
-  reducers: {},
+  reducers: {
+    resetBannerStatus: (state) => {
+      state.actionStatus = 'idle';
+      state.actionError = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Fetch Banners
@@ -84,21 +91,55 @@ const bannerSlice = createSlice({
         state.error = action.payload;
       })
       // Create Banner
-      .addCase(createBanner.fulfilled, (state, action) => {
-        state.items.push(action.payload);
+      .addCase(createBanner.pending, (state) => {
+        state.actionStatus = 'loading';
+        state.actionError = null;
       })
-      // Update Banner
-      .addCase(updateBanner.fulfilled, (state, action) => {
-        const index = state.items.findIndex((item) => item._id === action.payload._id);
-        if (index !== -1) {
-          state.items[index] = action.payload;
+      .addCase(createBanner.fulfilled, (state, action) => {
+        state.actionStatus = 'succeeded';
+        state.actionError = null;
+        if (action.payload) {
+          state.items.push(action.payload);
         }
       })
+      .addCase(createBanner.rejected, (state, action) => {
+        state.actionStatus = 'failed';
+        state.actionError = action.payload;
+      })
+      // Update Banner
+      .addCase(updateBanner.pending, (state) => {
+        state.actionStatus = 'loading';
+        state.actionError = null;
+      })
+      .addCase(updateBanner.fulfilled, (state, action) => {
+        state.actionStatus = 'succeeded';
+        state.actionError = null;
+        if (action.payload) {
+          const index = state.items.findIndex((item) => item._id === action.payload._id);
+          if (index !== -1) {
+            state.items[index] = action.payload;
+          }
+        }
+      })
+      .addCase(updateBanner.rejected, (state, action) => {
+        state.actionStatus = 'failed';
+        state.actionError = action.payload;
+      })
       // Delete Banner
+      .addCase(deleteBanner.pending, (state) => {
+        state.actionStatus = 'loading';
+        state.actionError = null;
+      })
       .addCase(deleteBanner.fulfilled, (state, action) => {
+        state.actionStatus = 'succeeded';
         state.items = state.items.filter((item) => item._id !== action.payload);
+      })
+      .addCase(deleteBanner.rejected, (state, action) => {
+        state.actionStatus = 'failed';
+        state.actionError = action.payload;
       });
   },
 });
 
+export const { resetBannerStatus } = bannerSlice.actions;
 export default bannerSlice.reducer;

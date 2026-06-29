@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Mail, Lock, Loader2, LogIn } from 'lucide-react';
+import GoogleSignIn from '../../Components/GoogleSignIn';
 import './Auth.css';
 
 const Login = () => {
@@ -89,6 +90,8 @@ const Login = () => {
                         {loading ? <Loader2 className="animate-spin" /> : 'Sign In'}
                     </button>
                 </form>
+
+                <GoogleSignIn onError={setError} setLoading={setLoading} />
 
                 <div className="auth-footer">
                     <p>Don't have an account? <Link to="/register">Create one now</Link></p>

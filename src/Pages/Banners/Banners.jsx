@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash, X, Image as ImageIcon, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash, X, Upload, Loader2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchBanners, createBanner, updateBanner, deleteBanner } from '../../features/bannerSlice';
+import { fetchBanners, createBanner, updateBanner, deleteBanner, resetBannerStatus } from '../../features/bannerSlice';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
 const Banners = () => {
   const dispatch = useDispatch();
-  const { items: banners, status } = useSelector((state) => state.banners);
+  const { items: banners, status, actionStatus, actionError } = useSelector((state) => state.banners);
 
   useEffect(() => {
     if (status === 'idle') {
@@ -18,8 +18,10 @@ const Banners = () => {
   const [editingBanner, setEditingBanner] = useState(null);
   const [formData, setFormData] = useState({ title: '', description: '', image: '', file: null });
   const [previewImage, setPreviewImage] = useState(null);
+  const [formError, setFormError] = useState('');
 
   const handleOpenModal = (banner = null) => {
+    setFormError('');
     if (banner) {
       setEditingBanner(banner);
       setFormData({ title: banner.title, description: banner.description, image: banner.image, file: null });
@@ -35,6 +37,8 @@ const Banners = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setPreviewImage(null);
+    setFormError('');
+    dispatch(resetBannerStatus());
   };
 
   const handleImageChange = (e) => {
@@ -51,6 +55,14 @@ const Banners = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
+
+    // Validate image for new banners
+    if (!editingBanner && !formData.file) {
+      setFormError('Please upload a banner image.');
+      return;
+    }
+
     const data = new FormData();
     data.append('title', formData.title);
     data.append('description', formData.description);
@@ -60,12 +72,25 @@ const Banners = () => {
       data.append('image', formData.image);
     }
 
-    if (editingBanner) {
-      await dispatch(updateBanner({ id: editingBanner._id, formData: data }));
-    } else {
-      await dispatch(createBanner(data));
+    try {
+      if (editingBanner) {
+        const result = await dispatch(updateBanner({ id: editingBanner._id, formData: data })).unwrap();
+        if (result) {
+          handleCloseModal();
+          // Re-fetch to ensure fresh data
+          dispatch(fetchBanners());
+        }
+      } else {
+        const result = await dispatch(createBanner(data)).unwrap();
+        if (result) {
+          handleCloseModal();
+          // Re-fetch to ensure fresh data
+          dispatch(fetchBanners());
+        }
+      }
+    } catch (err) {
+      setFormError(err || 'Something went wrong. Please try again.');
     }
-    handleCloseModal();
   };
 
   const handleDelete = (id) => {
@@ -85,6 +110,10 @@ const Banners = () => {
           <Plus size={20} /> Add Banner
         </button>
       </div>
+
+      {actionError && !isModalOpen && (
+        <div className="profile-alert error" style={{ marginBottom: 20 }}>{actionError}</div>
+      )}
 
       <div className="glass-card table-section">
         <table>
@@ -123,6 +152,13 @@ const Banners = () => {
                 </td>
               </tr>
             ))}
+            {banners.length === 0 && (
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                  No banners found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -134,6 +170,11 @@ const Banners = () => {
               <h2>{editingBanner ? 'Edit Banner' : 'Add New Banner'}</h2>
               <button className="close-btn" onClick={handleCloseModal}><X size={20} /></button>
             </div>
+
+            {formError && (
+              <div className="profile-alert error" style={{ marginBottom: 16 }}>{formError}</div>
+            )}
+
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Banner Title</label>
@@ -161,7 +202,7 @@ const Banners = () => {
                   {previewImage ? (
                     <div className="image-preview-container">
                       <img src={previewImage} alt="Preview" />
-                      <button type="button" className="remove-img" onClick={() => {setPreviewImage(null); setFormData({...formData, image: ''})}}>
+                      <button type="button" className="remove-img" onClick={() => {setPreviewImage(null); setFormData({...formData, image: '', file: null})}}>
                         <X size={14} />
                       </button>
                     </div>
@@ -176,7 +217,9 @@ const Banners = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="secondary" onClick={handleCloseModal}>Cancel</button>
-                <button type="submit" className="primary" style={{ backgroundColor: 'var(--accent-purple, #a855f7)' }}>Save Banner</button>
+                <button type="submit" className="primary" style={{ backgroundColor: 'var(--accent-purple, #a855f7)' }} disabled={actionStatus === 'loading'}>
+                  {actionStatus === 'loading' ? <Loader2 className="animate-spin" size={18} /> : 'Save Banner'}
+                </button>
               </div>
             </form>
           </div>
@@ -391,6 +434,14 @@ const Banners = () => {
           margin-top: 20px;
         }
 
+        .profile-alert.error {
+          background: rgba(255, 77, 77, 0.1);
+          border: 1px solid rgba(255, 77, 77, 0.3);
+          color: #ff4d4d;
+          padding: 12px 16px;
+          border-radius: 12px;
+          font-size: 0.9rem;
+        }
 
       `}</style>
     </div>

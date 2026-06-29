@@ -11,4 +11,18 @@ export const store = configureStore({
     products: productReducer,
     cart: cartReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // FormData is non-serializable — ignore it in banner thunk actions
+        ignoredActions: [
+          'banners/createBanner/pending',
+          'banners/createBanner/fulfilled',
+          'banners/createBanner/rejected',
+          'banners/updateBanner/pending',
+          'banners/updateBanner/fulfilled',
+          'banners/updateBanner/rejected',
+        ],
+      },
+    }),
 });

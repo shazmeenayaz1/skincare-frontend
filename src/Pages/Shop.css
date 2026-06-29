@@ -45,13 +45,13 @@
   padding: 10px 12px;
   border-radius: 8px;
   font-size: 0.9rem;
-  color: #444;
+  color: var(--store-text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .shop-cat-list button:hover {
-  background: #f0e6ff;
+  background: var(--store-surface-alt);
   color: var(--store-primary);
 }
 
@@ -66,7 +66,7 @@
 }
 
 .shop-count {
-  color: #666;
+  color: var(--store-text-secondary);
   font-size: 0.95rem;
   margin: 0;
 }
@@ -80,7 +80,7 @@
 .shop-empty {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: var(--store-text-secondary);
 }
 
 .shop-empty a {
