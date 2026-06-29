@@ -19,6 +19,7 @@ const Users = () => {
     status: 'Active' 
   });
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const fetchUsers = async () => {
     try {
@@ -38,6 +39,7 @@ const Users = () => {
   }, []);
 
   const handleOpenModal = (user = null) => {
+    setSubmitError('');
     if (user) {
       setEditingUser(user);
       // Map urole to Admin/Viewer
@@ -67,12 +69,15 @@ const Users = () => {
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => setIsModalOpen(false);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSubmitError('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitLoading(true);
-    setError('');
+    setSubmitError('');
     try {
       if (editingUser) {
         // Update user
@@ -100,10 +105,10 @@ const Users = () => {
           }
         });
       }
-      fetchUsers();
+      await fetchUsers();
       handleCloseModal();
     } catch (err) {
-      setError(err.message || 'Failed to save user');
+      setSubmitError(err.message || 'Failed to save user');
     } finally {
       setSubmitLoading(false);
     }
@@ -222,6 +227,9 @@ const Users = () => {
               <h2>{editingUser ? 'Edit User' : 'Add New User'}</h2>
               <button className="close-btn" onClick={handleCloseModal}><X size={20} /></button>
             </div>
+            {submitError && (
+              <div className="profile-alert error" style={{ marginBottom: 16 }}>{submitError}</div>
+            )}
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Full Name</label>

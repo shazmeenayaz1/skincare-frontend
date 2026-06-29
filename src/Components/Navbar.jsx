@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, User, ShoppingCart, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, User, ShoppingCart, ChevronDown, Sun, Moon } from 'lucide-react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,16 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -44,6 +54,23 @@ const Navbar = () => {
             <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : '')}>
               Contact
             </NavLink>
+          </li>
+          <li>
+            <button className="theme-toggle-nav-btn" onClick={toggleTheme} title="Toggle Theme" style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--store-text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8px',
+              borderRadius: '50%',
+              transition: 'all 0.2s',
+              marginLeft: '0.5rem'
+            }}>
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </li>
         </ul>
 

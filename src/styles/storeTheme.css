@@ -33,6 +33,31 @@ body.light {
   background-color: #fff5f9;
 }
 
+body.dark {
+  --store-bg: #09090b;
+  --store-surface: #121214;
+  --store-surface-alt: #1a1a1e;
+  --store-border: #27272a;
+  --store-border-light: #1e1e21;
+  --store-text: #f4f4f5;
+  --store-text-secondary: #a1a1aa;
+  --store-text-muted: #71717a;
+  --store-hero-bg: linear-gradient(135deg, #18121e 0%, #09090b 100%);
+  --store-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+  --bg-dark: #09090b;
+  --sidebar-bg: #121214;
+  --card-bg: #121214;
+  --glass-bg: rgba(237, 158, 197, 0.02);
+  --glass-border: #27272a;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --accent-pink: #ed9ec5;
+  --accent-cyan: #d985ad;
+  background-color: #09090b;
+}
+
 .store-page {
   background: var(--store-bg);
   color: var(--store-text);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import AdminLayout from './layouts/AdminLayout';
 import Overview from './Pages/Overview';
 import Products from './Pages/Products/Products';
@@ -34,7 +35,10 @@ import CartDrawer from './Components/CartDrawer';
 import ScrollToTop from './Components/ScrollToTop';
 
 function App() {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
   return (
+    <GoogleOAuthProvider clientId={googleClientId}>
     <Router>
       <ScrollToTop />
       <AuthProvider>
@@ -76,6 +80,7 @@ function App() {
         </Routes>
       </AuthProvider>
     </Router>
+    </GoogleOAuthProvider>
   );
 }
 
