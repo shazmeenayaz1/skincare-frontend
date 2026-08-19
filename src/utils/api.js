@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://skincare-backend-alpha.vercel.app';
+const rawBase = (import.meta.env.VITE_API_URL || 'https://skincare-backend-alpha.vercel.app').trim().replace(/\/+$/, '');
 
 const api = async (endpoint, options = {}) => {
     const token = localStorage.getItem('token');
@@ -24,7 +24,10 @@ const api = async (endpoint, options = {}) => {
         config.body = JSON.stringify(config.body);
     }
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, config);
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${rawBase}${cleanEndpoint}`;
+
+    const response = await fetch(url, config);
     const data = await response.json();
 
     if (!response.ok) {
